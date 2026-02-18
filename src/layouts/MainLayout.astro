@@ -1,0 +1,194 @@
+---
+import "../styles/global.css";
+
+interface Props {
+	title?: string;
+}
+
+const { title } = Astro.props;
+
+import Sidebar from "../components/Sidebar.astro";
+import TopBar from "../components/TopBar.astro";
+import AttendanceCalendar from "../components/AttendanceCalendar.astro";
+import ClassTabs from "../components/ClassTabs.astro";
+import StudentList from "../components/StudentList.astro";
+
+const attendanceStudents = [
+	{ initials: "JW", name: "James Wilson", color: "#6b9ee8" },
+	{ initials: "EC", name: "Emily Carter", color: "#e86b6b" },
+	{ initials: "SA", name: "Sarah Anderson", color: "#e8a06b" },
+	{ initials: "DR", name: "Daniel Roberts", color: "#6be8a0" },
+	{ initials: "OB", name: "Olivia Brown", color: "#a06be8" },
+	{ initials: "MJ", name: "Matthew Johnson", color: "#6be8e8" },
+	{ initials: "LM", name: "Laura Miller", color: "#e86bb8" },
+	{ initials: "AT", name: "Andrew Taylor", color: "#e8d06b" },
+	{ initials: "SH", name: "Sophie Harris", color: "#6bb8e8" },
+	{ initials: "JM", name: "Jessica Moore", color: "#b8e86b" },
+	{ initials: "RC", name: "Ryan Clark", color: "#e88a6b" },
+	{ initials: "EL", name: "Emma Lewis", color: "#8ae86b" },
+];
+
+const absenceStudents = [
+	{ initials: "HT", name: "Hannah Turner", color: "#e86b6b" },
+	{ initials: "NW", name: "Nicholas White", color: "#6b9ee8" },
+	{ initials: "VH", name: "Victoria Hall", color: "#a06be8" },
+	{ initials: "KA", name: "Kevin Adams", color: "#6be8a0" },
+];
+
+const delayedStudents = [
+	{ initials: "LM", name: "Laura Miller", color: "#e86bb8" },
+	{ initials: "EL", name: "Emma Lewis", color: "#8ae86b" },
+];
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{title + " - Admin Panel" || "Admin Panel"}</title>
+	</head>
+	<body>
+		<div class="app-wrapper">
+			<Sidebar />
+
+			<main class="main-content">
+				<TopBar />
+
+				<div class="page-body">
+					<div class="page-title-section">
+						<h1 class="page-title">Attendance</h1>
+						<p class="page-subtitle">
+							On the attendance page, you can easily track student
+							attendance and monitor absences.
+						</p>
+					</div>
+
+					<div class="content-layout">
+						<!-- Left: Calendar -->
+						<AttendanceCalendar />
+
+						<!-- Right: Student Lists -->
+						<div class="student-lists-area">
+							<div class="lists-top-bar">
+								<ClassTabs />
+							</div>
+
+							<div class="lists-columns">
+								<StudentList
+									title="Attendance"
+									count={23}
+									type="attendance"
+									students={attendanceStudents}
+								/>
+								<StudentList
+									title="Absences"
+									count={1}
+									type="absences"
+									students={absenceStudents}
+								/>
+								<StudentList
+									title="Delayed"
+									count={1}
+									type="delayed"
+									students={delayedStudents}
+								/>
+							</div>
+						</div>
+					</div>
+				</div>
+			</main>
+		</div>
+	</body>
+</html>
+
+<style is:global>
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	html,
+	body {
+		margin: 0;
+		padding: 0;
+		font-family: "DM Sans", sans-serif;
+		background: #f0f4f0;
+		min-height: 100vh;
+	}
+
+	.app-wrapper {
+		display: flex;
+		min-height: 100vh;
+		max-width: 1200px;
+		margin: 20px auto;
+		border-radius: 18px;
+		overflow: hidden;
+		box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+		background: white;
+	}
+
+	.main-content {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+		background: white;
+	}
+
+	.page-body {
+		padding: 24px 28px;
+		flex: 1;
+		overflow-y: auto;
+	}
+
+	.page-title-section {
+		margin-bottom: 24px;
+	}
+
+	.page-title {
+		font-size: 24px;
+		font-weight: 700;
+		color: #1e2e1e;
+		margin: 0 0 4px;
+	}
+
+	.page-subtitle {
+		font-size: 13px;
+		color: #8a9a8a;
+		margin: 0;
+	}
+
+	.content-layout {
+		display: flex;
+		gap: 28px;
+		align-items: flex-start;
+	}
+
+	.student-lists-area {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.lists-top-bar {
+		display: flex;
+		justify-content: flex-end;
+		margin-bottom: 16px;
+	}
+
+	.lists-columns {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 1px;
+		background: #eef2ee;
+		border: 1px solid #eef2ee;
+		border-radius: 12px;
+		overflow: hidden;
+	}
+
+	.lists-columns > :global(.student-list-column) {
+		background: white;
+		padding: 14px 12px;
+	}
+</style>
