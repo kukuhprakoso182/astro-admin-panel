@@ -1,0 +1,170 @@
+---
+export interface Props {
+    defaultCollapsed?: boolean;
+}
+
+const session = Astro.locals.session;
+const role = session?.role ?? "";
+---
+
+<nav class="m-5">
+    <ul>
+        <li class="my-2">
+            <a
+                href="http://127.0.0.1:8000/dashboard"
+                class="flex items-center justify-between p-3 bg-black drop-shadow-xl rounded-lg text-lap-white hover:bg-black hover:rounded-lg hover:text-lap-white"
+                ><span class="flex gap-2 items-center text-sm"
+                    ><i class="ri-home-6-line ri-lg"></i>Dashboard</span
+                ></a
+            >
+        </li><li class="my-2">
+            <a
+                href="http://127.0.0.1:8000/users"
+                class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-lap-white"
+                ><span class="flex gap-2 items-center text-sm"
+                    ><i class="ri-user-line ri-lg"></i>User</span
+                ></a
+            >
+        </li><li class="relative my-2">
+            <a
+                href="#"
+                class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-lap-white menu-toggle"
+                ><span class="flex gap-2 items-center text-sm"
+                    ><i class="ri-tools-line ri-lg"></i>Settings</span
+                ><svg
+                    class="w-4 h-4 transition-transform duration-200 transform"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"></path></svg
+                ></a
+            ><ul class="ml-4 nested-menu hidden">
+                <li class="my-2">
+                    <a
+                        href="http://127.0.0.1:8000/settings/icons"
+                        class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-lap-white"
+                        ><span class="flex gap-2 items-center text-sm"
+                            ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
+                            ></span>Icon</span
+                        ></a
+                    >
+                </li><li class="my-2">
+                    <a
+                        href="http://127.0.0.1:8000/settings/statuses"
+                        class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-lap-white"
+                        ><span class="flex gap-2 items-center text-sm"
+                            ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
+                            ></span>Status</span
+                        ></a
+                    >
+                </li><li class="my-2">
+                    <a
+                        href="http://127.0.0.1:8000/settings/roles"
+                        class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-lap-white"
+                        ><span class="flex gap-2 items-center text-sm"
+                            ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
+                            ></span>Role</span
+                        ></a
+                    >
+                </li><li class="my-2">
+                    <a
+                        href="http://127.0.0.1:8000/settings/permissions"
+                        class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-lap-white"
+                        ><span class="flex gap-2 items-center text-sm"
+                            ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
+                            ></span>Permission</span
+                        ></a
+                    >
+                </li><li class="my-2">
+                    <a
+                        href="http://127.0.0.1:8000/settings/menus"
+                        class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-lap-white"
+                        ><span class="flex gap-2 items-center text-sm"
+                            ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
+                            ></span>Menu</span
+                        ></a
+                    >
+                </li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+
+<script>
+    const menuToggles = document.querySelectorAll<HTMLElement>(".menu-toggle");
+    const toggleSidebarBtn = document.getElementById("toggleSidebar");
+    const sidebar = document.getElementById("sidebar");
+    const sidebarOverlay = document.getElementById("sidebar-overlay");
+
+    menuToggles.forEach((toggle) => {
+        toggle.addEventListener("click", (event) => {
+            event.preventDefault();
+
+            const nestedMenu = toggle.nextElementSibling;
+
+            if (nestedMenu && nestedMenu.classList.contains("nested-menu")) {
+                nestedMenu.classList.toggle("hidden");
+
+                const arrowIcon = toggle.querySelector("svg");
+                if (arrowIcon) {
+                    arrowIcon.classList.toggle("rotate-180");
+                }
+            }
+        });
+    });
+
+    // Fungsi untuk membuka sidebar
+    function openSidebar() {
+        if (sidebar && sidebarOverlay) {
+            sidebar.classList.remove("-translate-x-full");
+            sidebarOverlay.classList.remove("hidden");
+        }
+    }
+
+    // Fungsi untuk menutup sidebar
+    function closeSidebar() {
+        if (sidebar && sidebarOverlay) {
+            sidebar.classList.add("-translate-x-full");
+            sidebarOverlay.classList.add("hidden");
+        }
+    }
+
+    // Event listener untuk tombol toggle
+    if (toggleSidebarBtn && sidebar) {
+        toggleSidebarBtn.addEventListener("click", () => {
+            if (sidebar.classList.contains("-translate-x-full")) {
+                openSidebar();
+            } else {
+                closeSidebar();
+            }
+        });
+    }
+
+    // Event listener untuk overlay (menutup sidebar saat klik di luar)
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener("click", closeSidebar);
+    }
+
+    // Menutup sidebar saat ukuran layar berubah dari mobile ke desktop
+    // Ini memastikan sidebar selalu terbuka di desktop jika itu adalah perilaku yang diinginkan
+    window.addEventListener("resize", () => {
+        if (!sidebar || !sidebarOverlay) return; // early return jika null
+        if (window.innerWidth >= 768) {
+            // Mode Desktop
+            sidebar.classList.remove("-translate-x-full");
+            sidebarOverlay.classList.add("hidden");
+        } else {
+            // Mode Mobile (Saat di-resize ke bawah 768px)
+            // Kita sembunyikan kembali sidebar agar tombol toggle berfungsi normal
+            if (!sidebar.classList.contains("-translate-x-full")) {
+                sidebar.classList.add("-translate-x-full");
+            }
+            sidebarOverlay.classList.add("hidden");
+        }
+    });
+</script>

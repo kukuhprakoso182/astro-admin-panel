@@ -1,1 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+@import 'remixicon/fonts/remixicon.css';
+
+@theme {
+    --font-sans: 'Poppins', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji', 'Poppins';
+    --font-optical-sizing: auto;
+    --font-default: 'Poppins', sans-serif;
+    --color-lap-white: #FAF7F3;
+}

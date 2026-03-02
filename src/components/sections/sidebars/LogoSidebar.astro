@@ -1,0 +1,18 @@
+---
+import Logo from "../../ui/Logo.astro";
+const appName = import.meta.env.PUBLIC_APP_NAME ?? "Admin Panel";
+
+interface Props {
+    showAppName?: boolean;
+}
+
+const { showAppName = true } = Astro.props;
+---
+
+<!-- flex flex-row p-4 gap-2 items-center justify-start sticky top-0 z-10 w-full -->
+<div class="flex py-6">
+    <div class="flex flex-row gap-1 items-center p-4 w-full">
+        <Logo />
+        {showAppName && <span class="text-xl font-medium">{appName}</span>}
+    </div>
+</div>
