@@ -1,6 +1,19 @@
 ---
 import { Image } from "astro:assets";
 import logo from "../../assets/logo.svg";
+
+interface Props {
+    size?: "sm" | "md" | "lg" | "xl";
+}
+
+const { size = "md" } = Astro.props;
+
+const sizeClasses = {
+    sm: "h-8 w-8",
+    md: "h-10 w-10",
+    lg: "h-12 w-12",
+    xl: "h-16 w-16",
+};
 ---
 
-<Image src={logo} alt="Logo" class="h-10 w-10 mr-2" />
+<Image src={logo} alt="Logo" class={`${sizeClasses[size]} mr-2`} />

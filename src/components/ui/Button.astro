@@ -1,0 +1,58 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+// Mendukung semua atribut <button> dan <a> (untuk link bergaya tombol)
+interface Props extends HTMLAttributes<"button"> {
+    variant?: "primary" | "secondary" | "outline" | "ghost" | "danger";
+    size?: "sm" | "md" | "lg";
+    isFullWidth?: boolean;
+    href?: string; // Jika ada href, otomatis jadi elemen <a>
+}
+
+const {
+    variant = "primary",
+    size = "md",
+    isFullWidth = false,
+    href,
+    class: className,
+    ...attrs
+} = Astro.props;
+
+// 1. Mapping Gaya Visual (Varian)
+const variants = {
+    primary: "bg-slate-600 text-white hover:bg-slate-700 border-transparent",
+    secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200 border-transparent",
+    outline:
+        "bg-transparent border-gray-300 text-gray-700 hover:bg-gray-50 border",
+    ghost: "bg-transparent text-gray-600 hover:bg-gray-100 border-transparent",
+    danger: "bg-red-600 text-white hover:bg-red-700 border-transparent",
+};
+
+// 2. Mapping Ukuran (Size)
+const sizes = {
+    sm: "px-3 py-1.5 text-xs",
+    md: "px-5 py-2.5 text-sm",
+    lg: "px-8 py-3.5 text-base font-semibold",
+};
+
+const baseClasses =
+    "inline-flex items-center justify-center rounded-xl drop-shadow-xl transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer";
+
+const Element = href ? "a" : "button";
+---
+
+<Element
+    href={href}
+    class:list={[
+        baseClasses,
+        variants[variant],
+        sizes[size],
+        isFullWidth ? "w-full" : "",
+        className,
+    ]}
+    {...attrs}
+>
+    <slot name="before" />
+    <slot />
+    <slot name="after" />
+</Element>

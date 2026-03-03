@@ -1,0 +1,100 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"input"> {
+    label?: string;
+    error?: string;
+    containerClass?: string;
+    variant?: "outline" | "underlined" | "filled";
+}
+
+const {
+    label,
+    error,
+    variant = "outline",
+    containerClass = "",
+    id = Math.random().toString(36).substring(2, 9), // ID unik jika tidak diisi
+    type,
+    ...attrs
+} = Astro.props;
+
+const isPassword = type === "password";
+
+const variants = {
+    outline: "border border-slate-200 focus:ring-1 focus:ring-slate-200",
+    underlined:
+        "border-b-2 border-gray-300 focus:border-black rounded-none px-0",
+    filled: "bg-gray-100 border-transparent focus:bg-white focus:ring-2 focus:ring-slate-300",
+};
+
+const baseContainer =
+    "relative flex items-center w-full rounded-xl transition-all duration-200 overflow-hidden";
+const inputClasses =
+    "w-full p-4 outline-none bg-transparent disabled:opacity-50";
+---
+
+<div class={`flex flex-col gap-1.5 ${containerClass}`} data-input-wrapper>
+    {
+        label && (
+            <label for={id} class="text-sm font-medium text-gray-700">
+                {label} {attrs.required && <span class="text-red-500">*</span>}
+            </label>
+        )
+    }
+
+    <div
+        class:list={[
+            baseContainer,
+            variants[variant],
+            error ? "border-red-500" : "",
+        ]}
+    >
+        <input
+            {id}
+            {type}
+            class:list={[inputClasses, attrs.class]}
+            {...attrs}
+        />
+
+        {
+            isPassword && (
+                <button
+                    type="button"
+                    class="px-3 text-gray-400 hover:text-slate-600 transition-colors focus:outline-none cursor-pointer"
+                    data-toggle-password
+                    aria-label="Tampilkan password"
+                >
+                    <i class="ri-eye-fill show-icon" />
+                    <i class="ri-eye-close-fill hide-icon hidden" />
+                </button>
+            )
+        }
+    </div>
+
+    {error && <span class="text-xs text-red-500 mt-1">{error}</span>}
+</div>
+
+<script>
+    // Logika untuk menangani toggle password
+    const wrappers = document.querySelectorAll("[data-input-wrapper]");
+
+    wrappers.forEach((wrapper) => {
+        const btn = wrapper.querySelector("[data-toggle-password]");
+        const input = wrapper.querySelector("input");
+        const showIcon = wrapper.querySelector(".show-icon");
+        const hideIcon = wrapper.querySelector(".hide-icon");
+
+        if (btn && input) {
+            btn.addEventListener("click", () => {
+                const isPassword = input.getAttribute("type") === "password";
+
+                // Switch type
+                input.setAttribute("type", isPassword ? "text" : "password");
+
+                // Switch icons
+                showIcon?.classList.toggle("hidden");
+                hideIcon?.classList.toggle("hidden");
+            });
+        }
+    });
+</script>

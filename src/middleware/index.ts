@@ -5,7 +5,6 @@ import { verifySession } from '../lib/session';
 const unprotectedRoutes = ['/auths/login', '/auths/register'];
 
 export const onRequest = defineMiddleware(async ({ cookies, url, redirect, locals }, next) => {
-  return next();
   const sessionToken = cookies.get('session')?.value;
   const pathname = url.pathname;
 

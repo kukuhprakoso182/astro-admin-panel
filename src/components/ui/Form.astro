@@ -1,0 +1,104 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"form"> {
+    title?: string;
+    description?: string;
+    successMessage?: string;
+    grid?: boolean;
+}
+
+const {
+    title,
+    description,
+    successMessage = "Data berhasil dikirim!",
+    grid = false,
+    ...attrs
+} = Astro.props;
+---
+
+<form
+    {...attrs}
+    class:list={["space-y-6 bg-white p-6", attrs.class]}
+    data-astro-form
+>
+    {
+        (title || description) && (
+            <div class="mb-8">
+                {title && (
+                    <h2 class="text-2xl font-bold text-gray-800 font-semibold">
+                        {title}
+                    </h2>
+                )}
+                {description && (
+                    <p class="text-gray-500 text-sm mt-1">{description}</p>
+                )}
+            </div>
+        )
+    }
+
+    <div
+        class:list={[
+            grid ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "space-y-4",
+        ]}
+    >
+        <slot />
+    </div>
+
+    <div class="hidden status-message p-3 rounded-lg text-sm text-center"></div>
+</form>
+
+<script is:inline define:vars={{ successMessage }}>
+    const forms = document.querySelectorAll("[data-astro-form]");
+
+    forms.forEach((form) => {
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            // Mencari tombol submit di dalam slot
+            const btn = form.querySelector('button[type="submit"]');
+            const statusBox = form.querySelector(".status-message");
+            const formData = new FormData(form);
+
+            // 1. Loading State
+            if (btn) {
+                btn.disabled = true;
+                btn.style.opacity = "0.7";
+                // Menyimpan teks asli tombol
+                btn.dataset.originalText = btn.innerHTML;
+                btn.innerHTML = "Memproses...";
+            }
+            statusBox.classList.add("hidden");
+
+            try {
+                const response = await fetch(
+                    form.action || window.location.href,
+                    {
+                        method: form.method || "POST",
+                        body: formData,
+                    },
+                );
+
+                if (response.ok) {
+                    statusBox.textContent = successMessage;
+                    statusBox.className =
+                        "status-message p-3 rounded-lg text-sm text-center bg-green-50 text-green-700 block";
+                    form.reset();
+                } else {
+                    throw new Error();
+                }
+            } catch (err) {
+                statusBox.textContent = "Terjadi kesalahan. Silakan coba lagi.";
+                statusBox.className =
+                    "status-message p-3 rounded-lg text-sm text-center bg-red-50 text-red-700 block";
+            } finally {
+                // 2. Reset State
+                if (btn) {
+                    btn.disabled = false;
+                    btn.style.opacity = "1";
+                    btn.innerHTML = btn.dataset.originalText;
+                }
+            }
+        });
+    });
+</script>
