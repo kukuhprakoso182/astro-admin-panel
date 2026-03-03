@@ -1,5 +1,4 @@
 ---
-import { Image } from "astro:assets";
 import logo from "../../assets/logo.svg";
 
 interface Props {
@@ -16,4 +15,10 @@ const sizeClasses = {
 };
 ---
 
-<Image src={logo} alt="Logo" class={`${sizeClasses[size]} mr-2`} />
+<img
+    src={logo.src}
+    alt="Logo"
+    class={`${sizeClasses[size]} mr-2`}
+    loading="eager"
+    fetchpriority="high"
+/>
