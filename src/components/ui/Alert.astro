@@ -1,0 +1,377 @@
+---
+import type {
+    AlertVariant,
+    AlertPosition,
+    AlertProps,
+    VariantStyle,
+} from "./alert.types";
+
+interface Props extends AlertProps {}
+
+const {
+    variant = "info",
+    title = "Info",
+    message,
+    position = "inline",
+    dismissible = true,
+    show = true,
+    id = `alert-${Math.random().toString(36).slice(2, 7)}`,
+} = Astro.props;
+
+const variantStyles: Record<AlertVariant, VariantStyle> = {
+    success: {
+        container: "bg-white border border-emerald-300 shadow-lg",
+        icon: "bg-emerald-400",
+        title: "text-gray-800",
+        message: "text-gray-500",
+        dismiss:
+            "text-gray-500 hover:text-gray-500 hover:bg-gray-100 cursor-pointer",
+        bar: "",
+    },
+    error: {
+        container: "bg-white border border-red-300 shadow-lg",
+        icon: "bg-red-300",
+        title: "text-gray-800",
+        message: "text-gray-500",
+        dismiss:
+            "text-gray-500 hover:text-gray-500 hover:bg-gray-100 cursor-pointer",
+        bar: "",
+    },
+    warning: {
+        container: "bg-white border border-amber-300 shadow-lg",
+        icon: "bg-amber-400",
+        title: "text-gray-800",
+        message: "text-gray-500",
+        dismiss:
+            "text-gray-500 hover:text-gray-500 hover:bg-gray-100 cursor-pointer",
+        bar: "",
+    },
+    info: {
+        container: "bg-white border border-gray-300 shadow-lg",
+        icon: "bg-gray-300",
+        title: "text-gray-800",
+        message: "text-gray-500",
+        dismiss:
+            "text-gray-500 hover:text-gray-500 hover:bg-gray-100 cursor-pointer",
+        bar: "",
+    },
+};
+
+const icons: Record<AlertVariant, string> = {
+    success: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" class="w-5 h-5"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" /></svg>`,
+    error: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" class="w-5 h-5"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z" clip-rule="evenodd" /></svg>`,
+    warning: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" class="w-5 h-5"><path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd" /></svg>`,
+    info: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" class="w-5 h-5"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 0 1 .67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 1 1-.671-1.34l.041-.022ZM12 9a.75.75 0 1 0 0-1.5A.75.75 0 0 0 12 9Z" clip-rule="evenodd" /></svg>`,
+};
+
+const styles = variantStyles[variant];
+const isFixed = position !== "inline";
+---
+
+{
+    show && (
+        <div
+            id={id}
+            role="alert"
+            data-alert
+            data-position={position}
+            data-variant={variant}
+            data-title={title}
+            data-message={message}
+            class:list={[
+                isFixed ? "alert-toast w-80" : "relative w-full",
+                styles.container,
+                "rounded-2xl overflow-hidden",
+                isFixed && "animate-slide-in",
+            ]}
+            style={isFixed ? "position:fixed;" : ""}
+        >
+            <div class="flex items-center gap-3 p-3">
+                <div
+                    class:list={[
+                        "shrink-0 w-11 h-11 rounded-xl flex items-center justify-center",
+                        styles.icon,
+                    ]}
+                >
+                    <Fragment set:html={icons[variant]} />
+                </div>
+
+                <div class="flex-1 min-w-0">
+                    <p
+                        class:list={[
+                            "text-sm font-semibold leading-tight",
+                            styles.title,
+                        ]}
+                    >
+                        {title}
+                    </p>
+                    <p
+                        class:list={[
+                            "text-xs mt-0.5 leading-snug",
+                            styles.message,
+                        ]}
+                    >
+                        {message}
+                    </p>
+                </div>
+
+                {dismissible && (
+                    <button
+                        type="button"
+                        aria-label="Tutup notifikasi"
+                        data-dismiss={id}
+                        class:list={[
+                            "shrink-0 rounded-lg p-1.5 transition-colors duration-150",
+                            styles.dismiss,
+                        ]}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            class="w-4 h-4"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                    </button>
+                )}
+            </div>
+        </div>
+    )
+}
+
+<style>
+    /* ── Kontainer stacking per posisi ── */
+    .alert-stack {
+        position: fixed;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 320px;
+        pointer-events: none;
+    }
+    .alert-stack > * {
+        pointer-events: all;
+    }
+
+    .alert-stack[data-stack-pos="top-right"] {
+        top: 1rem;
+        right: 1rem;
+    }
+    .alert-stack[data-stack-pos="top-left"] {
+        top: 1rem;
+        left: 1rem;
+    }
+    .alert-stack[data-stack-pos="top-center"] {
+        top: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    .alert-stack[data-stack-pos="bottom-right"] {
+        bottom: 1rem;
+        right: 1rem;
+        flex-direction: column-reverse;
+    }
+    .alert-stack[data-stack-pos="bottom-left"] {
+        bottom: 1rem;
+        left: 1rem;
+        flex-direction: column-reverse;
+    }
+    .alert-stack[data-stack-pos="bottom-center"] {
+        bottom: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        flex-direction: column-reverse;
+    }
+
+    /* ── Toast item ── */
+    .alert-toast {
+        position: relative !important;
+        width: 100% !important;
+        transition:
+            transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+            opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+            max-height 0.3s ease,
+            margin 0.3s ease,
+            padding 0.3s ease;
+    }
+
+    /* ── Slide in ── */
+    @keyframes toast-in-top {
+        from {
+            opacity: 0;
+            transform: translateY(-14px) scale(0.96);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    @keyframes toast-in-bottom {
+        from {
+            opacity: 0;
+            transform: translateY(14px) scale(0.96);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .alert-toast.animate-slide-in[data-position^="top"] {
+        animation: toast-in-top 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .alert-toast.animate-slide-in[data-position^="bottom"] {
+        animation: toast-in-bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    /* ── Slide out (kanan untuk right/inline, kiri untuk left/center) ── */
+    @keyframes toast-out-right {
+        0% {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+            max-height: 120px;
+            margin-bottom: 0;
+        }
+        45% {
+            opacity: 0;
+            transform: translateX(36px) scale(0.96);
+            max-height: 120px;
+        }
+        100% {
+            opacity: 0;
+            transform: translateX(36px) scale(0.96);
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin: 0;
+        }
+    }
+    @keyframes toast-out-left {
+        0% {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+            max-height: 120px;
+            margin-bottom: 0;
+        }
+        45% {
+            opacity: 0;
+            transform: translateX(-36px) scale(0.96);
+            max-height: 120px;
+        }
+        100% {
+            opacity: 0;
+            transform: translateX(-36px) scale(0.96);
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin: 0;
+        }
+    }
+
+    .alert-toast.dismissing[data-position$="right"],
+    .alert-toast.dismissing[data-position="inline"] {
+        animation: toast-out-right 0.38s cubic-bezier(0.4, 0, 1, 1) forwards;
+        overflow: hidden;
+        pointer-events: none;
+    }
+    .alert-toast.dismissing[data-position$="left"],
+    .alert-toast.dismissing[data-position$="center"] {
+        animation: toast-out-left 0.38s cubic-bezier(0.4, 0, 1, 1) forwards;
+        overflow: hidden;
+        pointer-events: none;
+    }
+</style>
+
+<script is:inline>
+    (function () {
+        // Pastikan hanya inisialisasi sekali
+        if (window.__alertStackInit) return;
+        window.__alertStackInit = true;
+
+        // Daftar semua posisi fixed
+        var POSITIONS = [
+            "top-right",
+            "top-left",
+            "top-center",
+            "bottom-right",
+            "bottom-left",
+            "bottom-center",
+        ];
+
+        // Buat atau ambil container stack untuk posisi tertentu
+        function getStack(pos) {
+            var stackId = "alert-stack-" + pos;
+            var stack = document.getElementById(stackId);
+            if (!stack) {
+                stack = document.createElement("div");
+                stack.id = stackId;
+                stack.className = "alert-stack";
+                stack.setAttribute("data-stack-pos", pos);
+                document.body.appendChild(stack);
+            }
+            return stack;
+        }
+
+        // Pindahkan semua toast fixed ke dalam stack container-nya
+        function mountToasts() {
+            var toasts = document.querySelectorAll("[data-alert]");
+            toasts.forEach(function (toast) {
+                var pos = toast.getAttribute("data-position");
+                if (!pos || pos === "inline") return;
+                if (toast.closest(".alert-stack")) return; // sudah di stack
+
+                // Reset inline style position yang di-set server-side
+                toast.style.position = "";
+
+                var stack = getStack(pos);
+                stack.appendChild(toast);
+            });
+        }
+
+        // Dismiss handler
+        function handleDismiss(e) {
+            var btn = e.target.closest("[data-dismiss]");
+            if (!btn) return;
+
+            var id = btn.getAttribute("data-dismiss");
+            var alertEl = document.getElementById(id);
+            if (!alertEl) return;
+
+            alertEl.classList.add("dismissing");
+
+            alertEl.addEventListener(
+                "animationend",
+                function () {
+                    alertEl.remove();
+                },
+                { once: true },
+            );
+
+            setTimeout(function () {
+                if (alertEl && alertEl.parentNode) alertEl.remove();
+            }, 450);
+        }
+
+        document.addEventListener("click", handleDismiss);
+
+        // Jalankan mount saat DOM siap
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", mountToasts);
+        } else {
+            mountToasts();
+        }
+
+        // Support Astro view transitions
+        document.addEventListener("astro:page-load", function () {
+            window.__alertStackInit = false;
+            window.__alertStackInit = true;
+            mountToasts();
+        });
+    })();
+</script>
