@@ -4,27 +4,40 @@ import Logo from "../../components/ui/Logo.astro";
 import Input from "../../components/ui/Input.astro";
 import Button from "../../components/ui/Button.astro";
 import Layout from "../../layouts/GuestLayout.astro";
-import { actions } from "astro:actions";
 import Alert from "../../components/ui/Alert.astro";
+import { actions, isInputError } from "astro:actions";
+
+const result = Astro.getActionResult(actions.auths.login);
+console.log("result:", JSON.stringify(result, null, 2));
+console.log("result.data:", result?.data);
+console.log("result.error:", result?.error);
+console.log("isInputError:", isInputError(result?.error));
+
+if (result?.data?.success) {
+    return Astro.redirect("/dashboard");
+}
+
+// Error format dari Zod
+const inputErrors = isInputError(result?.error) ? result.error.fields : {};
+
+// Error logic bisnis dari service
+const serviceErrors = result?.data?.errors ?? {};
+const serviceMessage = result?.data?.message;
+
+const hasError = !!result && !result.data?.success;
 ---
 
+{
+    hasError && (
+        <Alert
+            variant="error"
+            title="Login Gagal"
+            message={serviceMessage ?? "Terjadi kesalahan."}
+            position="top-right"
+        />
+    )
+}
 <Layout title="Login">
-    <Alert
-        variant="success"
-        message="Data berhasil disimpan."
-        position="top-right"
-    />
-    <Alert
-        variant="error"
-        message="Gagal menghapus item."
-        position="top-right"
-    />
-    <Alert
-        variant="warning"
-        message="Sesi hampir habis."
-        position="top-right"
-    />
-
     <div class="flex items-center justify-center h-screen">
         <div
             class="w-full max-w-md p-4 space-y-6 bg-white rounded-4xl lg:shadow-2xl m-2 lg:m-0 transition-all duration-300"
@@ -32,9 +45,10 @@ import Alert from "../../components/ui/Alert.astro";
             <div class="flex justify-center">
                 <Logo size="xl" />
             </div>
-            <span class="block text-xl font-bold text-center">
-                Welcome Back
-            </span>
+
+            <span class="block text-xl font-bold text-center">Welcome Back</span
+            >
+
             <Form action={actions.auths.login} method="POST">
                 <div class="gap-2">
                     <Input
@@ -45,8 +59,10 @@ import Alert from "../../components/ui/Alert.astro";
                         autocomplete="email"
                         variant="filled"
                         required
+                        error={inputErrors.email?.[0] ?? serviceErrors.email}
                     />
                 </div>
+
                 <div class="gap-2">
                     <Input
                         id="password"
@@ -56,8 +72,11 @@ import Alert from "../../components/ui/Alert.astro";
                         autocomplete="off"
                         variant="filled"
                         required
+                        error={inputErrors.password?.[0] ??
+                            serviceErrors.password}
                     />
                 </div>
+
                 <div>
                     <Button
                         type="submit"
@@ -69,7 +88,6 @@ import Alert from "../../components/ui/Alert.astro";
                     </Button>
                 </div>
             </Form>
-            <form action="/auths/login" method="POST" class="space-y-5"></form>
         </div>
     </div>
 </Layout>

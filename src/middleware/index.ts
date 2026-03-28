@@ -1,31 +1,35 @@
 import { defineMiddleware } from 'astro:middleware';
 import { verifySession } from '../lib/session';
 
-// Daftar halaman yang tidak memerlukan autentikasi
 const unprotectedRoutes = ['/auths/login', '/auths/register'];
 
 export const onRequest = defineMiddleware(async ({ cookies, url, redirect, locals }, next) => {
   const sessionToken = cookies.get('session')?.value;
   const pathname = url.pathname;
 
-  // Verify session jika ada token
   let session = null;
   if (sessionToken) {
     session = await verifySession(sessionToken);
-    locals.session = sessionToken ? await verifySession(sessionToken) : null;
+    locals.session = session;
   }
 
   const isUnprotectedRoute = unprotectedRoutes.some(route => pathname.startsWith(route));
 
+  // Sudah login
   if (session) {
-    if (!isUnprotectedRoute) {
-      return redirect('/');
+    // Coba akses halaman login/register → redirect ke dashboard
+    if (isUnprotectedRoute) {
+      return redirect('/dashboard');
     }
+    // Akses halaman lain → lanjut
     return next();
   }
 
+  // Belum login
   if (isUnprotectedRoute) {
     return next();
   }
+
+  // Belum login, akses halaman protected → redirect ke login
   return redirect('/auths/login');
 });

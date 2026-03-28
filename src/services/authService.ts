@@ -39,23 +39,23 @@ export interface AuthUser {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-// const BCRYPT_ROUNDS = 12;
+const BCRYPT_ROUNDS = 12;
 
-// function stripPassword(user: typeof users.$inferSelect): AuthUser {
-//   const { password: _pw, ...safeUser } = user;
-//   return safeUser;
-// }
+function stripPassword(user: typeof users.$inferSelect): AuthUser {
+  const { password: _pw, ...safeUser } = user;
+  return safeUser;
+}
 
-// function validateEmail(email: string): boolean {
-//   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-// }
+function validateEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
-// function validatePasswordStrength(password: string): string | null {
-//   if (password.length < 8) return 'Password minimal 8 karakter.';
-//   if (!/[A-Z]/.test(password)) return 'Password harus mengandung minimal 1 huruf kapital.';
-//   if (!/[0-9]/.test(password)) return 'Password harus mengandung minimal 1 angka.';
-//   return null;
-// }
+function validatePasswordStrength(password: string): string | null {
+  if (password.length < 6) return 'Password minimal 6 karakter.';
+  if (!/[^A-Za-z0-9]/.test(password)) return 'Password harus mengandung simbol.';
+  if (!/[0-9]/.test(password)) return 'Password harus mengandung minimal 1 angka.';
+  return null;
+}
 
 // ─── Auth Service ─────────────────────────────────────────────────────────────
 
@@ -66,7 +66,6 @@ export const authService = {
   async register(input: RegisterInput): Promise<ServiceResult<AuthUser>> {
     const errors: Record<string, string> = {};
 
-    // Validasi input
     const name = input.name?.trim();
     const email = input.email?.trim().toLowerCase();
     const password = input.password;
@@ -88,7 +87,6 @@ export const authService = {
       return { success: false, message: 'Validasi gagal.', errors };
     }
 
-    // Cek email sudah terdaftar
     const existing = await db
       .select({ id: users.id })
       .from(users)
@@ -103,11 +101,9 @@ export const authService = {
       };
     }
 
-    // Tentukan role & status default
     const roleId = input.roleId ?? 'admin';
     const statusId = input.statusId ?? 'active';
 
-    // Validasi role & status ada di database
     const [roleExists, statusExists] = await Promise.all([
       db.select({ id: roles.id }).from(roles).where(eq(roles.id, roleId)).limit(1),
       db.select({ id: statuses.id }).from(statuses).where(eq(statuses.id, statusId)).limit(1),
@@ -120,7 +116,6 @@ export const authService = {
       return { success: false, message: 'Status tidak ditemukan.', errors: { statusId: 'Status tidak valid.' } };
     }
 
-    // Hash password & simpan
     const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
     const now = new Date();
     const newUser = {
@@ -174,7 +169,6 @@ export const authService = {
       };
     }
 
-    // Cari user berdasarkan email
     const result = await db
       .select()
       .from(users)
@@ -182,7 +176,6 @@ export const authService = {
       .limit(1);
 
     if (result.length === 0) {
-      // Pesan generik agar tidak membocorkan info akun
       return {
         success: false,
         message: 'Email atau password salah.',
@@ -191,7 +184,6 @@ export const authService = {
 
     const user = result[0];
 
-    // Cek apakah akun aktif
     if (user.statusId !== 'active') {
       return {
         success: false,
@@ -199,7 +191,6 @@ export const authService = {
       };
     }
 
-    // Verifikasi password
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
       return {
@@ -233,7 +224,6 @@ export const authService = {
       return { success: false, message: 'Validasi gagal.', errors };
     }
 
-    // Validasi kekuatan password baru
     const pwError = validatePasswordStrength(newPassword);
     if (pwError) {
       return {
@@ -243,7 +233,6 @@ export const authService = {
       };
     }
 
-    // Cek password baru dan konfirmasi cocok
     if (newPassword !== confirmPassword) {
       return {
         success: false,
@@ -252,7 +241,6 @@ export const authService = {
       };
     }
 
-    // Cek password baru tidak sama dengan password lama
     if (currentPassword === newPassword) {
       return {
         success: false,
@@ -261,7 +249,6 @@ export const authService = {
       };
     }
 
-    // Ambil user dari database
     const result = await db
       .select()
       .from(users)
@@ -274,7 +261,6 @@ export const authService = {
 
     const user = result[0];
 
-    // Verifikasi password saat ini
     const isValid = await bcrypt.compare(currentPassword, user.password);
     if (!isValid) {
       return {
@@ -284,7 +270,6 @@ export const authService = {
       };
     }
 
-    // Hash password baru & update
     const hashedPassword = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
 
     await db
@@ -298,7 +283,7 @@ export const authService = {
     };
   },
 
-  // ── Get User By ID (helper untuk session) ────────────────────────────────
+  // ── Get User By ID ────────────────────────────────────────────────────────
 
   async getUserById(userId: string): Promise<ServiceResult<AuthUser>> {
     if (!userId) {

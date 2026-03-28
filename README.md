@@ -41,7 +41,8 @@ All commands are run from the root of the project, from a terminal:
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro
 `migration` |
-| `npx drizzle-kit migrate` | Migration Database
+| `npx drizzle-kit migrate` | Generate
+| `npx drizzle-kit generate` | Migration Database
 `seed` |
 | `npx tsx src/db/seed.ts` | Init data Database
  CLI                     |

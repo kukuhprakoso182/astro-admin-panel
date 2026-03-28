@@ -1,4 +1,4 @@
-import auths from "./auths";
+import {auths} from "./auths";
 
 export const server = {
   auths
