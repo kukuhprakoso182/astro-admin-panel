@@ -8,10 +8,6 @@ import Alert from "../../components/ui/Alert.astro";
 import { actions, isInputError } from "astro:actions";
 
 const result = Astro.getActionResult(actions.auths.login);
-console.log("result:", JSON.stringify(result, null, 2));
-console.log("result.data:", result?.data);
-console.log("result.error:", result?.error);
-console.log("isInputError:", isInputError(result?.error));
 
 if (result?.data?.success) {
     return Astro.redirect("/dashboard");

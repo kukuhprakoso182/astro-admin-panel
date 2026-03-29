@@ -11,7 +11,7 @@ const role = session?.role ?? "";
     <ul>
         <li class="my-2">
             <a
-                href="http://127.0.0.1:8000/dashboard"
+                href="/dashboard"
                 class="flex items-center justify-between p-3 bg-black drop-shadow-xl rounded-lg text-white hover:bg-black hover:rounded-lg hover:text-white"
                 ><span class="flex gap-2 items-center text-sm"
                     ><i class="ri-home-6-line ri-lg"></i>Dashboard</span
@@ -19,7 +19,7 @@ const role = session?.role ?? "";
             >
         </li><li class="my-2">
             <a
-                href="http://127.0.0.1:8000/users"
+                href="/users"
                 class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white"
                 ><span class="flex gap-2 items-center text-sm"
                     ><i class="ri-user-line ri-lg"></i>User</span
@@ -47,7 +47,7 @@ const role = session?.role ?? "";
             ><ul class="ml-4 nested-menu hidden">
                 <li class="my-2">
                     <a
-                        href="http://127.0.0.1:8000/settings/icons"
+                        href="/settings/icons"
                         class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white"
                         ><span class="flex gap-2 items-center text-sm"
                             ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
@@ -56,7 +56,7 @@ const role = session?.role ?? "";
                     >
                 </li><li class="my-2">
                     <a
-                        href="http://127.0.0.1:8000/settings/statuses"
+                        href="/settings/statuses"
                         class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white"
                         ><span class="flex gap-2 items-center text-sm"
                             ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
@@ -65,7 +65,7 @@ const role = session?.role ?? "";
                     >
                 </li><li class="my-2">
                     <a
-                        href="http://127.0.0.1:8000/settings/roles"
+                        href="/settings/roles"
                         class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white"
                         ><span class="flex gap-2 items-center text-sm"
                             ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
@@ -74,7 +74,7 @@ const role = session?.role ?? "";
                     >
                 </li><li class="my-2">
                     <a
-                        href="http://127.0.0.1:8000/settings/permissions"
+                        href="/settings/permissions"
                         class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white"
                         ><span class="flex gap-2 items-center text-sm"
                             ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
@@ -83,74 +83,7 @@ const role = session?.role ?? "";
                     >
                 </li><li class="my-2">
                     <a
-                        href="http://127.0.0.1:8000/settings/menus"
-                        class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white"
-                        ><span class="flex gap-2 items-center text-sm"
-                            ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
-                            ></span>Menu</span
-                        ></a
-                    >
-                </li>
-            </ul>
-        </li>
-        <li class="relative my-2">
-            <a
-                href="#"
-                class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white menu-toggle"
-                ><span class="flex gap-2 items-center text-sm"
-                    ><i class="ri-tools-line ri-lg"></i>Settings</span
-                ><svg
-                    class="w-4 h-4 transition-transform duration-200 transform"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                    ><path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 9l-7 7-7-7"></path></svg
-                ></a
-            ><ul class="ml-4 nested-menu hidden">
-                <li class="my-2">
-                    <a
-                        href="http://127.0.0.1:8000/settings/icons"
-                        class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white"
-                        ><span class="flex gap-2 items-center text-sm"
-                            ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
-                            ></span>Icon</span
-                        ></a
-                    >
-                </li><li class="my-2">
-                    <a
-                        href="http://127.0.0.1:8000/settings/statuses"
-                        class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white"
-                        ><span class="flex gap-2 items-center text-sm"
-                            ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
-                            ></span>Status</span
-                        ></a
-                    >
-                </li><li class="my-2">
-                    <a
-                        href="http://127.0.0.1:8000/settings/roles"
-                        class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white"
-                        ><span class="flex gap-2 items-center text-sm"
-                            ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
-                            ></span>Role</span
-                        ></a
-                    >
-                </li><li class="my-2">
-                    <a
-                        href="http://127.0.0.1:8000/settings/permissions"
-                        class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white"
-                        ><span class="flex gap-2 items-center text-sm"
-                            ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
-                            ></span>Permission</span
-                        ></a
-                    >
-                </li><li class="my-2">
-                    <a
-                        href="http://127.0.0.1:8000/settings/menus"
+                        href="/settings/menus"
                         class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white"
                         ><span class="flex gap-2 items-center text-sm"
                             ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"

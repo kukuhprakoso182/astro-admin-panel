@@ -17,11 +17,10 @@ export const onRequest = defineMiddleware(async ({ cookies, url, redirect, local
 
   // Sudah login
   if (session) {
-    // Coba akses halaman login/register → redirect ke dashboard
-    if (isUnprotectedRoute) {
+    // Akses "/" atau halaman login/register → redirect ke dashboard
+    if (pathname === '/' || isUnprotectedRoute) {
       return redirect('/dashboard');
     }
-    // Akses halaman lain → lanjut
     return next();
   }
 
@@ -30,6 +29,5 @@ export const onRequest = defineMiddleware(async ({ cookies, url, redirect, local
     return next();
   }
 
-  // Belum login, akses halaman protected → redirect ke login
   return redirect('/auths/login');
 });
