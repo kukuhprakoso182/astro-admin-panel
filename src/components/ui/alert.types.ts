@@ -15,6 +15,7 @@ export interface AlertProps {
   message: string;
   position?: AlertPosition;
   dismissible?: boolean;
+  duration?: number; // dalam milidetik, 0 = tidak auto-dismiss
   show?: boolean;
   id?: string;
 }

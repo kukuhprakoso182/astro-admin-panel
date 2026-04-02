@@ -4,12 +4,17 @@ import Logo from "../../components/ui/Logo.astro";
 import Input from "../../components/ui/Input.astro";
 import Button from "../../components/ui/Button.astro";
 import Layout from "../../layouts/GuestLayout.astro";
-import Alert from "../../components/ui/Alert.astro";
 import { actions, isInputError } from "astro:actions";
 
-const result = Astro.getActionResult(actions.auths.login);
+const isPost = Astro.request.method === "POST";
+const result = isPost ? Astro.getActionResult(actions.auths.login) : null;
 
 if (result?.data?.success) {
+    await Astro.session?.set("alert", {
+        variant: "success",
+        title: "Berhasil",
+        message: result.data.message ?? "Login berhasil",
+    });
     return Astro.redirect("/dashboard");
 }
 
@@ -23,17 +28,16 @@ const serviceMessage = result?.data?.message;
 const hasError = !!result && !result.data?.success;
 ---
 
-{
-    hasError && (
-        <Alert
-            variant="error"
-            title="Login Gagal"
-            message={serviceMessage ?? "Terjadi kesalahan."}
-            position="top-right"
-        />
-    )
-}
-<Layout title="Login">
+<Layout
+    title="Login"
+    alert={hasError
+        ? {
+              variant: "error",
+              title: "Login Gagal",
+              message: serviceMessage ?? "Terjadi kesalahan.",
+          }
+        : undefined}
+>
     <div class="flex items-center justify-center h-screen">
         <div
             class="w-full max-w-md p-4 space-y-6 bg-white rounded-4xl lg:shadow-2xl m-2 lg:m-0 transition-all duration-300"
