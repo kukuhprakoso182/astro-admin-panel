@@ -6,38 +6,33 @@ import Button from "../../components/ui/Button.astro";
 import Layout from "../../layouts/GuestLayout.astro";
 import { actions, isInputError } from "astro:actions";
 
+// Ambil email dari form data jika POST
 const isPost = Astro.request.method === "POST";
+let previousEmail = "";
+
+if (isPost) {
+    const formData = await Astro.request.clone().formData();
+    previousEmail = formData.get("email")?.toString() ?? "";
+}
 const result = isPost ? Astro.getActionResult(actions.auths.login) : null;
 
-if (result?.data?.success) {
+if (result?.data && isPost) {
     await Astro.session?.set("alert", {
-        variant: "success",
-        title: "Berhasil",
-        message: result.data.message ?? "Login berhasil",
+        variant: result?.data?.success ? "success" : "error",
+        title: "Informasi",
+        message: result?.data?.message,
     });
+}
+
+if (result?.data?.success) {
     return Astro.redirect("/dashboard");
 }
 
 // Error format dari Zod
 const inputErrors = isInputError(result?.error) ? result.error.fields : {};
-
-// Error logic bisnis dari service
-const serviceErrors = result?.data?.errors ?? {};
-const serviceMessage = result?.data?.message;
-
-const hasError = !!result && !result.data?.success;
 ---
 
-<Layout
-    title="Login"
-    alert={hasError
-        ? {
-              variant: "error",
-              title: "Login Gagal",
-              message: serviceMessage ?? "Terjadi kesalahan.",
-          }
-        : undefined}
->
+<Layout title="Login">
     <div class="flex items-center justify-center h-screen">
         <div
             class="w-full max-w-md p-4 space-y-6 bg-white rounded-4xl lg:shadow-2xl m-2 lg:m-0 transition-all duration-300"
@@ -58,8 +53,9 @@ const hasError = !!result && !result.data?.success;
                         type="email"
                         autocomplete="email"
                         variant="filled"
+                        value={previousEmail}
                         required
-                        error={inputErrors.email?.[0] ?? serviceErrors.email}
+                        error={inputErrors.email?.join(", ")}
                     />
                 </div>
 
@@ -72,8 +68,7 @@ const hasError = !!result && !result.data?.success;
                         autocomplete="off"
                         variant="filled"
                         required
-                        error={inputErrors.password?.[0] ??
-                            serviceErrors.password}
+                        error={inputErrors.password?.join(", ")}
                     />
                 </div>
 
