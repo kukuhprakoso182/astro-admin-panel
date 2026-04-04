@@ -1,43 +1,12 @@
 import { eq } from 'drizzle-orm';
 import { randomUUID } from 'crypto';
 import bcrypt from 'bcryptjs';
-import { db } from '../db/client';
-import { users, roles, statuses } from '../db/schema';
+import { db } from '../../db/client';
+import { users, roles, statuses } from '../../db/schema';
 import type { ServiceResult } from '@/types/service';
+import { RegisterInput, LoginInput, ChangePasswordInput, AuthUser} from './authService.types';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface RegisterInput {
-  name: string;
-  email: string;
-  password: string;
-  roleId?: string;
-  statusId?: string;
-}
-
-export interface LoginInput {
-  email: string;
-  password: string;
-}
-
-export interface ChangePasswordInput {
-  userId: string;
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-}
-
-export interface AuthUser {
-  id: string;
-  name: string;
-  email: string;
-  roleId: string;
-  statusId: string;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// Helpers
 
 const BCRYPT_ROUNDS = 12;
 
@@ -57,11 +26,11 @@ function validatePasswordStrength(password: string): string | null {
   return null;
 }
 
-// ─── Auth Service ─────────────────────────────────────────────────────────────
+// Auth Service
 
 export const authService = {
 
-  // ── Register ──────────────────────────────────────────────────────────────
+  // Register 
 
   async register(input: RegisterInput): Promise<ServiceResult<AuthUser>> {
     const errors: Record<string, string> = {};
@@ -144,7 +113,7 @@ export const authService = {
     };
   },
 
-  // ── Login ─────────────────────────────────────────────────────────────────
+  // Login 
 
   async login(input: LoginInput): Promise<ServiceResult<AuthUser>> {
     const email = input.email?.trim().toLowerCase();
@@ -206,7 +175,7 @@ export const authService = {
     };
   },
 
-  // ── Change Password ───────────────────────────────────────────────────────
+  // Change Password 
 
   async changePassword(input: ChangePasswordInput): Promise<ServiceResult> {
     const { userId, currentPassword, newPassword, confirmPassword } = input;

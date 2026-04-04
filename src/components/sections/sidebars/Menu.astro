@@ -1,101 +1,96 @@
 ---
+import { menuService } from "../../../services/menu/menuService";
+import type { MenuItem } from "../../../services/menu/menuService.types";
+
 export interface Props {
     defaultCollapsed?: boolean;
 }
 
+const currentPath = Astro.url.pathname.replace(/^\/+/, "");
 const session = Astro.locals.session;
-const role = session?.role ?? "";
+const userId = session?.userId ?? "";
+
+// Ambil menu dari service
+const response = userId ? await menuService.getMenuSidebar(userId) : null;
+let menuTree: any = [];
+if (response?.success) {
+    menuTree = response.data ?? [];
+}
+
+function checkActive(currentPath: string, item: MenuItem): boolean {
+    console.log("check link : " + currentPath + " === " + item.link);
+    const isDirectMatch = currentPath.startsWith(item.link || "");
+
+    // Logika rekursif untuk mengecek anak-anaknya
+    const isChildMatch =
+        findLink(currentPath, item.children || []) === currentPath;
+
+    return isDirectMatch || isChildMatch;
+}
+
+function findLink(path: string, menus: MenuItem[]): string | boolean {
+    const normalizedPath = path.replace(/^\/+/, "");
+
+    for (const menu of menus) {
+        // Cek apakah link menu ini cocok dengan awal path
+        if (menu.link && normalizedPath.startsWith(menu.link)) {
+            return true;
+        }
+
+        // Cek rekursif ke anak-anak menu jika ada
+        if (menu.children && Array.isArray(menu.children)) {
+            if (findLink(path, menu.children)) {
+                return path;
+            }
+        }
+    }
+    return false;
+}
+// Render menu item secara rekursif
+function renderMenu(items: MenuItem[]): string {
+    return items
+        .map((item) => {
+            const hasChildren = item.children && item.children.length > 0;
+            const icon = item.icon
+                ? `<i class="${item.icon} ri-lg"></i>`
+                : `<span class="w-1.5 h-1.5 rounded-full bg-gray-300"></span>`;
+            const bgSelected = checkActive(currentPath, item)
+                ? "bg-black text-white rounded-lg"
+                : "hover:bg-black hover:rounded-lg hover:text-white";
+
+            if (hasChildren) {
+                return `
+                <li class="relative my-2">
+                    <a href="#" class="flex items-center justify-between p-3 menu-toggle ${bgSelected}">
+                        <span class="flex gap-2 items-center text-sm">${icon}${item.name}</span>
+                        <svg class="w-4 h-4 transition-transform duration-200 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </a>
+                    <ul class="ml-4 nested-menu hidden">
+                        ${renderMenu(item.children)}
+                    </ul>
+                </li>
+            `;
+            }
+
+            return `
+            <li class="my-2">
+                <a href="${item.link}" class="flex items-center justify-between p-3 ${bgSelected}">
+                    <span class="flex gap-2 items-center text-sm">${icon}${item.name}</span>
+                </a>
+            </li>
+        `;
+        })
+        .join("");
+}
 ---
 
 <nav class="m-5">
-    <ul>
-        <li class="my-2">
-            <a
-                href="/dashboard"
-                class="flex items-center justify-between p-3 bg-black drop-shadow-xl rounded-lg text-white hover:bg-black hover:rounded-lg hover:text-white"
-                ><span class="flex gap-2 items-center text-sm"
-                    ><i class="ri-home-6-line ri-lg"></i>Dashboard</span
-                ></a
-            >
-        </li><li class="my-2">
-            <a
-                href="/users"
-                class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white"
-                ><span class="flex gap-2 items-center text-sm"
-                    ><i class="ri-user-line ri-lg"></i>User</span
-                ></a
-            >
-        </li>
-        <li class="relative my-2">
-            <a
-                href="#"
-                class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white menu-toggle"
-                ><span class="flex gap-2 items-center text-sm"
-                    ><i class="ri-tools-line ri-lg"></i>Settings</span
-                ><svg
-                    class="w-4 h-4 transition-transform duration-200 transform"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                    ><path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 9l-7 7-7-7"></path></svg
-                ></a
-            ><ul class="ml-4 nested-menu hidden">
-                <li class="my-2">
-                    <a
-                        href="/settings/icons"
-                        class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white"
-                        ><span class="flex gap-2 items-center text-sm"
-                            ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
-                            ></span>Icon</span
-                        ></a
-                    >
-                </li><li class="my-2">
-                    <a
-                        href="/settings/statuses"
-                        class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white"
-                        ><span class="flex gap-2 items-center text-sm"
-                            ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
-                            ></span>Status</span
-                        ></a
-                    >
-                </li><li class="my-2">
-                    <a
-                        href="/settings/roles"
-                        class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white"
-                        ><span class="flex gap-2 items-center text-sm"
-                            ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
-                            ></span>Role</span
-                        ></a
-                    >
-                </li><li class="my-2">
-                    <a
-                        href="/settings/permissions"
-                        class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white"
-                        ><span class="flex gap-2 items-center text-sm"
-                            ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
-                            ></span>Permission</span
-                        ></a
-                    >
-                </li><li class="my-2">
-                    <a
-                        href="/settings/menus"
-                        class="flex items-center justify-between p-3 hover:bg-black hover:rounded-lg hover:text-white"
-                        ><span class="flex gap-2 items-center text-sm"
-                            ><span class="w-1.5 h-1.5 rounded-full bg-gray-300"
-                            ></span>Menu</span
-                        ></a
-                    >
-                </li>
-            </ul>
-        </li>
-    </ul>
+    <ul set:html={renderMenu(menuTree)} />
 </nav>
 
+<!-- script tetap sama -->
 <script>
     const menuToggles = document.querySelectorAll<HTMLElement>(".menu-toggle");
     const toggleSidebarBtn = document.getElementById("toggleSidebar");
@@ -110,7 +105,6 @@ const role = session?.role ?? "";
             const isCurrentlyOpen =
                 nestedMenu && !nestedMenu.classList.contains("hidden");
 
-            // Tutup semua nested menu yang terbuka
             menuToggles.forEach((otherToggle) => {
                 const otherNestedMenu = otherToggle.nextElementSibling;
                 if (
@@ -119,13 +113,10 @@ const role = session?.role ?? "";
                 ) {
                     otherNestedMenu.classList.add("hidden");
                     const otherArrow = otherToggle.querySelector("svg");
-                    if (otherArrow) {
-                        otherArrow.classList.remove("rotate-180");
-                    }
+                    if (otherArrow) otherArrow.classList.remove("rotate-180");
                 }
             });
 
-            // Buka menu yang diklik (jika sebelumnya tertutup)
             if (
                 nestedMenu &&
                 nestedMenu.classList.contains("nested-menu") &&
@@ -133,14 +124,11 @@ const role = session?.role ?? "";
             ) {
                 nestedMenu.classList.remove("hidden");
                 const arrowIcon = toggle.querySelector("svg");
-                if (arrowIcon) {
-                    arrowIcon.classList.add("rotate-180");
-                }
+                if (arrowIcon) arrowIcon.classList.add("rotate-180");
             }
         });
     });
 
-    // Fungsi untuk membuka sidebar
     function openSidebar() {
         if (sidebar && sidebarOverlay) {
             sidebar.classList.remove("-translate-x-full");
@@ -148,7 +136,6 @@ const role = session?.role ?? "";
         }
     }
 
-    // Fungsi untuk menutup sidebar
     function closeSidebar() {
         if (sidebar && sidebarOverlay) {
             sidebar.classList.add("-translate-x-full");
@@ -156,7 +143,6 @@ const role = session?.role ?? "";
         }
     }
 
-    // Event listener untuk tombol toggle
     if (toggleSidebarBtn && sidebar) {
         toggleSidebarBtn.addEventListener("click", () => {
             if (sidebar.classList.contains("-translate-x-full")) {
@@ -167,22 +153,16 @@ const role = session?.role ?? "";
         });
     }
 
-    // Event listener untuk overlay (menutup sidebar saat klik di luar)
     if (sidebarOverlay) {
         sidebarOverlay.addEventListener("click", closeSidebar);
     }
 
-    // Menutup sidebar saat ukuran layar berubah dari mobile ke desktop
-    // Ini memastikan sidebar selalu terbuka di desktop jika itu adalah perilaku yang diinginkan
     window.addEventListener("resize", () => {
-        if (!sidebar || !sidebarOverlay) return; // early return jika null
+        if (!sidebar || !sidebarOverlay) return;
         if (window.innerWidth >= 768) {
-            // Mode Desktop
             sidebar.classList.remove("-translate-x-full");
             sidebarOverlay.classList.add("hidden");
         } else {
-            // Mode Mobile (Saat di-resize ke bawah 768px)
-            // Kita sembunyikan kembali sidebar agar tombol toggle berfungsi normal
             if (!sidebar.classList.contains("-translate-x-full")) {
                 sidebar.classList.add("-translate-x-full");
             }

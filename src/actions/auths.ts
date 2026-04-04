@@ -1,6 +1,6 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
-import { authService } from '@/services/authService';
+import { authService } from '@/services/auth/authService';
 import { createSession } from '../lib/session';
 
 export const auths = {

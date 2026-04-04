@@ -67,7 +67,7 @@ async function main() {
       statusId:  'active',
       name:      'The Super Admin',
       email:     'superadmin@gmail.com',
-      password:  '$2y$12$vgtRZL2IJfLQqe7TyfjvC.VCqDtP9UD31VyPzFyM7AUABbLCZiqqa',
+      password:  '$2y$12$vgtRZL2IJfLQqe7TyfjvC.VCqDtP9UD31VyPzFyM7AUABbLCZiqqa',//admin1!
       createdAt: new Date('2025-10-22T17:50:28Z'),
       updatedAt: new Date('2025-10-22T17:51:09Z'),
     },
@@ -77,7 +77,7 @@ async function main() {
       statusId:  'active',
       name:      'The Admin',
       email:     'admin@gmail.com',
-      password:  '$2y$12$3yjpBZH5O2tzZNSTWBcVJ.7GNhRpT6012lSOFc8C0rAU51hVzoQqy',
+      password:  '$2y$12$3yjpBZH5O2tzZNSTWBcVJ.7GNhRpT6012lSOFc8C0rAU51hVzoQqy',//password1!
       createdAt: new Date('2025-10-22T17:50:28Z'),
       updatedAt: new Date('2025-10-22T17:50:28Z'),
     },
