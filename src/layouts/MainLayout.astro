@@ -1,6 +1,6 @@
 ---
-// import components
 import Sidebar from "../components/sections/sidebars/Sidebar.astro";
+import Navbar from "../components/sections/Navbar.astro";
 import Layout from "./Layout.astro";
 
 interface Props {
@@ -11,6 +11,113 @@ const { title } = Astro.props;
 ---
 
 <Layout title={title}>
+	<div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-30 hidden">
+	</div>
+
 	<Sidebar />
-	<slot />
+
+	<div
+		id="main-wrapper"
+		class="min-h-screen flex flex-col transition-all duration-300 ease-in-out"
+	>
+		<Navbar />
+		<main class="flex-1 p-6 bg-gray-100 lg:rounded-l-4xl">
+			<div class="flex flex-col gap-3">
+				<span class="bg-white px-4 py-2 rounded-xl text-base"
+					>{title}</span
+				>
+				<div class="flex px-4 py-2">
+					<slot />
+				</div>
+			</div>
+		</main>
+	</div>
 </Layout>
+
+<!-- Script diletakkan di sini agar semua elemen sudah ada di DOM -->
+<script is:inline>
+	document.addEventListener("DOMContentLoaded", function () {
+		var SIDEBAR_W = 320;
+		var sidebar = document.getElementById("sidebar");
+		var overlay = document.getElementById("sidebar-overlay");
+		var toggleBtn = document.getElementById("toggleSidebar");
+		var wrapper = document.getElementById("main-wrapper");
+		var userBtn = document.getElementById("userMenuBtn");
+		var dropdown = document.getElementById("userDropdown");
+		var arrow = document.getElementById("userMenuArrow");
+
+		var isDesktop = function () {
+			return window.innerWidth >= 768;
+		};
+		var sidebarOpen = false;
+
+		function openSidebar() {
+			sidebarOpen = true;
+			if (sidebar) sidebar.classList.remove("-translate-x-full");
+
+			// Overlay hanya di mobile
+			if (!isDesktop() && overlay) overlay.classList.remove("hidden");
+
+			// Geser wrapper hanya di desktop
+			if (isDesktop() && wrapper)
+				wrapper.style.paddingLeft = SIDEBAR_W + "px";
+		}
+
+		function closeSidebar() {
+			sidebarOpen = false;
+			if (sidebar) sidebar.classList.add("-translate-x-full");
+
+			// Selalu hide overlay
+			if (overlay) overlay.classList.add("hidden");
+
+			// Reset wrapper padding
+			if (wrapper) wrapper.style.paddingLeft = "0px";
+		}
+
+		// Init — desktop langsung open, mobile langsung close
+		if (isDesktop()) {
+			openSidebar();
+		} else {
+			closeSidebar();
+		}
+
+		if (toggleBtn) {
+			toggleBtn.addEventListener("click", function () {
+				sidebarOpen ? closeSidebar() : openSidebar();
+			});
+		}
+
+		// Klik overlay tutup sidebar (mobile only)
+		if (overlay) overlay.addEventListener("click", closeSidebar);
+
+		window.addEventListener("resize", function () {
+			if (isDesktop()) {
+				// Pindah ke desktop — hide overlay, apply padding jika open
+				if (overlay) overlay.classList.add("hidden");
+				if (wrapper)
+					wrapper.style.paddingLeft = sidebarOpen
+						? SIDEBAR_W + "px"
+						: "0px";
+			} else {
+				// Pindah ke mobile — reset padding, hide overlay
+				if (wrapper) wrapper.style.paddingLeft = "0px";
+				if (overlay) overlay.classList.add("hidden");
+			}
+		});
+
+		// User dropdown
+		if (userBtn && dropdown) {
+			userBtn.addEventListener("click", function (e) {
+				e.stopPropagation();
+				var hidden = dropdown.classList.contains("hidden");
+				dropdown.classList.toggle("hidden", !hidden);
+				if (arrow)
+					arrow.style.transform = hidden ? "rotate(180deg)" : "";
+			});
+			document.addEventListener("click", function () {
+				if (dropdown) dropdown.classList.add("hidden");
+				if (arrow) arrow.style.transform = "";
+			});
+		}
+	});
+</script>
