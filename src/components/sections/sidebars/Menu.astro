@@ -18,7 +18,6 @@ if (response?.success) {
 }
 
 function checkActive(currentPath: string, item: MenuItem): boolean {
-    console.log("check link : " + currentPath + " === " + item.link);
     const isDirectMatch = currentPath.startsWith(item.link || "");
 
     // Logika rekursif untuk mengecek anak-anaknya

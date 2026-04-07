@@ -1,0 +1,15 @@
+---
+Astro.cookies.delete("session", { path: "/" });
+
+// Hapus semua data session
+await Astro.session?.destroy();
+
+// Simpan flash message untuk halaman login
+await Astro.session?.set("alert", {
+    variant: "success",
+    title: "Berhasil",
+    message: "Anda berhasil logout.",
+});
+
+return Astro.redirect("/auths/login");
+---
