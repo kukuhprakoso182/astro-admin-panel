@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import Alert from "../components/ui/alert/Alert.astro";
+import Dialog from "../components/ui/dialog/Dialog.astro";
 
 interface AlertData {
     variant: "success" | "error" | "warning" | "info";
@@ -47,6 +48,7 @@ const alert = alertProp ?? sessionAlert ?? null;
                 />
             )
         }
+        <Dialog />
         <slot />
     </body>
 </html>

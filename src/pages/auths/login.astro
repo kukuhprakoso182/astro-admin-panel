@@ -43,7 +43,6 @@ const inputErrors = isInputError(result?.error) ? result.error.fields : {};
 
             <span class="block text-xl font-bold text-center">Welcome Back</span
             >
-
             <Form action={actions.auths.login} method="POST">
                 <div class="gap-2">
                     <Input
@@ -86,3 +85,8 @@ const inputErrors = isInputError(result?.error) ? result.error.fields : {};
         </div>
     </div>
 </Layout>
+<script>
+    import { openModal } from "../../components/ui/dialog/dialog";
+
+    openModal("Halo!", "Ini dipanggil dari client-side.");
+</script>

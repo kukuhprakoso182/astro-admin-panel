@@ -1,37 +1,15 @@
 import { eq } from 'drizzle-orm';
 import { randomUUID } from 'crypto';
-import bcrypt from 'bcryptjs';
 import { db } from '../../db/client';
 import { users, roles, statuses } from '../../db/schema';
 import type { ServiceResult } from '@/types/service';
 import { RegisterInput, LoginInput, ChangePasswordInput, AuthUser} from './authService.types';
-
-// Helpers
-
-const BCRYPT_ROUNDS = 12;
-
-function stripPassword(user: typeof users.$inferSelect): AuthUser {
-  const { password: _pw, ...safeUser } = user;
-  return safeUser;
-}
-
-function validateEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function validatePasswordStrength(password: string): string | null {
-  if (password.length < 6) return 'Password minimal 6 karakter.';
-  if (!/[^A-Za-z0-9]/.test(password)) return 'Password harus mengandung simbol.';
-  if (!/[0-9]/.test(password)) return 'Password harus mengandung minimal 1 angka.';
-  return null;
-}
-
-// Auth Service
+import { stripPassword, validateEmail, validatePasswordStrength } from '../../lib/validator_utils';
+import { hashPassword, comparePassword } from '../../lib/bcrypt_utils';
 
 export const authService = {
 
   // Register 
-
   async register(input: RegisterInput): Promise<ServiceResult<AuthUser>> {
     const errors: Record<string, string> = {};
 
@@ -85,7 +63,7 @@ export const authService = {
       return { success: false, message: 'Status tidak ditemukan.', errors: { statusId: 'Status tidak valid.' } };
     }
 
-    const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
+    const hashedPassword = await hashPassword(password);
     const now = new Date();
     const newUser = {
       id: randomUUID(),
@@ -114,69 +92,76 @@ export const authService = {
   },
 
   // Login 
-
   async login(input: LoginInput): Promise<ServiceResult<AuthUser>> {
-    const email = input.email?.trim().toLowerCase();
-    const password = input.password;
+    try {
+        const email = input.email?.trim().toLowerCase();
+        const password = input.password;
 
-    if (!email || !password) {
+        if (!email || !password) {
+          return {
+            success: false,
+            message: 'Email dan password wajib diisi.',
+            errors: {
+              ...(!email && { email: 'Email wajib diisi.' }),
+              ...(!password && { password: 'Password wajib diisi.' }),
+            },
+          };
+        }
+
+        if (!validateEmail(email)) {
+          return {
+            success: false,
+            message: 'Format email tidak valid.',
+            errors: { email: 'Format email tidak valid.' },
+          };
+        }
+
+        const result = await db
+          .select()
+          .from(users)
+          .where(eq(users.email, email))
+          .limit(1);
+
+        if (result.length === 0) {
+          return {
+            success: false,
+            message: 'Email atau password salah.',
+          };
+        }
+
+        const user = result[0];
+
+        if (user.statusId !== 'active') {
+          return {
+            success: false,
+            message: 'Akun Anda tidak aktif. Hubungi administrator.',
+          };
+        }
+
+        const isValid = await comparePassword(password, user.password);
+        if (!isValid) {
+          return {
+            success: false,
+            message: 'Email atau password salah.',
+          };
+        }
+
+        return {
+          success: true,
+          message: 'Login berhasil.',
+          data: stripPassword(user),
+        };
+    } catch (error) {
+      console.error('Error saat proses login :', error);
       return {
         success: false,
-        message: 'Email dan password wajib diisi.',
-        errors: {
-          ...(!email && { email: 'Email wajib diisi.' }),
-          ...(!password && { password: 'Password wajib diisi.' }),
-        },
+        message: 'Terjadi kesalahan internal. Silakan coba lagi nanti.',
       };
     }
-
-    if (!validateEmail(email)) {
-      return {
-        success: false,
-        message: 'Format email tidak valid.',
-        errors: { email: 'Format email tidak valid.' },
-      };
-    }
-
-    const result = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
-
-    if (result.length === 0) {
-      return {
-        success: false,
-        message: 'Email atau password salah.',
-      };
-    }
-
-    const user = result[0];
-
-    if (user.statusId !== 'active') {
-      return {
-        success: false,
-        message: 'Akun Anda tidak aktif. Hubungi administrator.',
-      };
-    }
-
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) {
-      return {
-        success: false,
-        message: 'Email atau password salah.',
-      };
-    }
-
-    return {
-      success: true,
-      message: 'Login berhasil.',
-      data: stripPassword(user),
-    };
+    
   },
 
   // Change Password 
-
   async changePassword(input: ChangePasswordInput): Promise<ServiceResult> {
     const { userId, currentPassword, newPassword, confirmPassword } = input;
     const errors: Record<string, string> = {};
@@ -230,7 +215,7 @@ export const authService = {
 
     const user = result[0];
 
-    const isValid = await bcrypt.compare(currentPassword, user.password);
+    const isValid = await comparePassword(currentPassword, user.password);
     if (!isValid) {
       return {
         success: false,
@@ -239,7 +224,7 @@ export const authService = {
       };
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+    const hashedPassword = await hashPassword(newPassword);
 
     await db
       .update(users)
