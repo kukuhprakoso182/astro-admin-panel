@@ -1,0 +1,258 @@
+<div
+    id="global-modal-backdrop"
+    class="fixed inset-0 z-9999 flex items-center justify-center p-4 invisible opacity-0 transition-all duration-300"
+    aria-modal="true"
+    role="dialog"
+    aria-labelledby="modal-title"
+>
+    <!-- Backdrop -->
+    <div
+        id="modal-backdrop-overlay"
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+    >
+    </div>
+
+    <!-- Panel -->
+    <div
+        id="modal-panel"
+        class="relative z-10 w-full max-w-md
+      bg-white
+      border border-zinc-200
+      rounded-2xl shadow-2xl shadow-black/20
+      translate-y-4 opacity-0
+      transition-all duration-300 ease-out
+      overflow-hidden"
+    >
+        <!-- Header -->
+        <div class="flex items-start justify-between px-6 pt-5 pb-0">
+            <div class="flex items-center gap-3">
+                <h2
+                    id="modal-title"
+                    class="text-base font-semibold text-zinc-900 leading-snug"
+                >
+                    Judul Modal
+                </h2>
+            </div>
+            <button
+                id="modal-close-btn"
+                class="ml-3 shrink-0 w-7 h-7 rounded-lg
+          flex items-center justify-center
+          text-zinc-400 hover:text-zinc-700
+          hover:bg-zinc-100
+          transition-colors duration-150 text-sm cursor-pointer"
+                aria-label="Tutup modal"
+            >
+                ✕
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="px-6 pt-3 pb-2">
+            <p id="modal-content" class="text-sm text-zinc-600 leading-relaxed">
+            </p>
+            <!-- Slot untuk konten HTML kustom -->
+            <div id="modal-html-content" class="hidden text-sm text-zinc-600">
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div
+            class="flex items-center justify-end gap-2 px-6 py-4 border-t border-zinc-100 mt-2"
+        >
+            <button
+                id="modal-cancel-btn"
+                class="px-4 py-2 rounded-xl text-sm font-medium
+          text-zinc-600
+          bg-zinc-100
+          hover:bg-zinc-200
+          transition-colors duration-150
+          hidden cursor-pointer"
+            >
+                Batal
+            </button>
+            <button
+                id="modal-confirm-btn"
+                class="px-4 py-2 rounded-xl text-sm font-semibold
+          text-white
+          bg-violet-600 hover:bg-violet-700
+          transition-all duration-150
+          shadow-sm shadow-violet-500/30
+          active:scale-95 cursor-pointer"
+            >
+                OK
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        // ─── Elemen ──────────────────────────────────────────────────────────────
+        const backdrop = document.getElementById("global-modal-backdrop")!;
+        const overlay = document.getElementById("modal-backdrop-overlay")!;
+        const panel = document.getElementById("modal-panel")!;
+        const titleEl = document.getElementById("modal-title")!;
+        const contentEl = document.getElementById("modal-content")!;
+        const htmlEl = document.getElementById("modal-html-content")!;
+        const closeBtn = document.getElementById("modal-close-btn")!;
+        const cancelBtn = document.getElementById("modal-cancel-btn")!;
+        const confirmBtn = document.getElementById("modal-confirm-btn")!;
+
+        // ─── State ───────────────────────────────────────────────────────────────
+        let currentOnConfirm: (() => void) | null = null;
+        let currentOnCancel: (() => void) | null = null;
+
+        // ─── Tipe preset ─────────────────────────────────────────────────────────
+        type ModalType = "info" | "success" | "warning" | "danger" | "confirm";
+
+        const presets: Record<
+            ModalType,
+            {
+                iconBg: string;
+                accent: string;
+                confirmClass: string;
+            }
+        > = {
+            info: {
+                iconBg: "bg-blue-50",
+                accent: "from-blue-400 via-cyan-400 to-sky-400",
+                confirmClass:
+                    "bg-blue-600 hover:bg-blue-700 shadow-blue-500/30",
+            },
+            success: {
+                iconBg: "bg-emerald-50",
+                accent: "from-emerald-400 via-teal-400 to-cyan-400",
+                confirmClass:
+                    "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/30",
+            },
+            warning: {
+                iconBg: "bg-amber-50",
+                accent: "from-amber-400 via-orange-400 to-yellow-400",
+                confirmClass:
+                    "bg-amber-500 hover:bg-amber-600 shadow-amber-500/30",
+            },
+            danger: {
+                iconBg: "bg-red-50",
+                accent: "from-red-400 via-rose-400 to-pink-400",
+                confirmClass: "bg-red-600 hover:bg-red-700 shadow-red-500/30",
+            },
+            confirm: {
+                iconBg: "bg-violet-50",
+                accent: "from-violet-500 via-fuchsia-500 to-pink-500",
+                confirmClass:
+                    "bg-violet-600 hover:bg-violet-700 shadow-violet-500/30",
+            },
+        };
+
+        // ─── Buka modal ──────────────────────────────────────────────────────────
+        interface ModalOptions {
+            title?: string;
+            content?: string;
+            html?: string;
+            type?: ModalType;
+            confirmText?: string;
+            cancelText?: string;
+            showCancel?: boolean;
+            onConfirm?: () => void;
+            onCancel?: () => void;
+        }
+
+        function open(opts: ModalOptions = {}) {
+            const {
+                title = "Informasi",
+                content = "",
+                html = "",
+                type = "info",
+                confirmText = "OK",
+                cancelText = "Batal",
+                showCancel = type === "confirm",
+                onConfirm,
+                onCancel,
+            } = opts;
+
+            const preset = presets[type];
+
+            // — Isi konten
+            titleEl.textContent = title;
+
+            if (html) {
+                contentEl.classList.add("hidden");
+                htmlEl.classList.remove("hidden");
+                htmlEl.innerHTML = html;
+            } else {
+                htmlEl.classList.add("hidden");
+                contentEl.classList.remove("hidden");
+                contentEl.textContent = content;
+            }
+
+            confirmBtn.className = `px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-150 shadow-sm active:scale-95 cursor-pointer ${preset.confirmClass}`;
+
+            // — Tombol
+            confirmBtn.textContent = confirmText;
+            cancelBtn.textContent = cancelText;
+            cancelBtn.classList.toggle("hidden", !showCancel);
+
+            // — Callback
+            currentOnConfirm = onConfirm ?? null;
+            currentOnCancel = onCancel ?? null;
+
+            // — Animasi masuk
+            backdrop.classList.remove("invisible", "opacity-0");
+            panel.classList.remove("translate-y-4", "opacity-0");
+            document.body.style.overflow = "hidden";
+        }
+
+        // ─── Tutup modal ─────────────────────────────────────────────────────────
+        function close() {
+            backdrop.classList.add("opacity-0");
+            panel.classList.add("translate-y-4", "opacity-0");
+
+            setTimeout(() => {
+                backdrop.classList.add("invisible");
+                htmlEl.innerHTML = "";
+                document.body.style.overflow = "";
+            }, 300);
+        }
+
+        // ─── Event listeners ─────────────────────────────────────────────────────
+        closeBtn.addEventListener("click", () => {
+            close();
+            currentOnCancel?.();
+        });
+
+        overlay.addEventListener("click", () => {
+            close();
+            currentOnCancel?.();
+        });
+
+        cancelBtn.addEventListener("click", () => {
+            close();
+            currentOnCancel?.();
+        });
+
+        confirmBtn.addEventListener("click", () => {
+            currentOnConfirm?.();
+            close();
+        });
+
+        document.addEventListener("keydown", (e) => {
+            if (
+                e.key === "Escape" &&
+                !backdrop.classList.contains("invisible")
+            ) {
+                close();
+                currentOnCancel?.();
+            }
+        });
+
+        // ─── Custom event listener ───────────────────────────────────────────────
+        document.addEventListener("modal:open", (e: Event) => {
+            open((e as CustomEvent<ModalOptions>).detail);
+        });
+
+        document.addEventListener("modal:close", close);
+
+        // ─── Daftarkan ke window (API global) ─────────────────────────────────────
+        (window as any).$modal = { open, close };
+    })();
+</script>

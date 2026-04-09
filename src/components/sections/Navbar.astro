@@ -70,12 +70,48 @@ const userEmail = session?.email ?? "";
                 <i class="ri-user-line"></i> Profile
             </a>
             <hr class="my-1 border-gray-100" />
-            <a
-                href="/auths/logout"
-                class="flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-red-50"
+            <button
+                id="logoutBtn"
+                class="flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-red-50 w-full text-left cursor-pointer"
             >
                 <i class="ri-logout-box-r-line"></i> Logout
-            </a>
+            </button>
         </div>
     </div>
 </header>
+
+<script>
+    declare global {
+        interface Window {
+            $modal: {
+                open: (opts: Record<string, unknown>) => void;
+                close: () => void;
+            };
+        }
+    }
+    const logoutBtn = document.getElementById("logoutBtn");
+    logoutBtn?.addEventListener("click", () => {
+        window.$modal.open({
+            type: "danger",
+            icon: "🚪",
+            badge: "Sesi Aktif",
+            title: "Logout",
+            content: "Anda akan logout dan sesi aktif akan dihapus. Lanjutkan?",
+            showCancel: true,
+            okText: "Ya, Logout",
+            cancelText: "Batal",
+
+            onConfirm: async () => {
+                const form = document.createElement("form");
+                form.method = "POST";
+                form.action = "/auths/logout";
+                document.body.appendChild(form);
+                form.submit();
+            },
+
+            onCancel: () => {
+                // Tindakan saat membatalkan logout
+            },
+        });
+    });
+</script>
